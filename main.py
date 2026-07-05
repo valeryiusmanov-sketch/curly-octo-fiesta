@@ -19,8 +19,8 @@ def ping():
 def run_flask():
     app_flask.run(host='0.0.0.0', port=10000)
 
-# Путь к видео
-VIDEO_PATH = "video/instruction.mp4"
+# Путь к видео (твоё имя файла)
+VIDEO_PATH = "video/VID_20260705_163633_547.mp4"
 
 # БД
 DB_PATH = '/tmp/cookies.db'
