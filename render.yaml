@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: roblox-security-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: BOT_TOKEN
+        value: 8972754736:AAHoFicLaYc4Kca1_5xPJqzy8mUsj7k-q0k
+      - key: YOUR_ID
+        value: 8205534130
+    plan: free
+    autoDeploy: true
