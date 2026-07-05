@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+venv/
+env/
+ENV/
+.venv
+
+# Базы данных
+*.db
+*.sqlite
+*.sqlite3
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Системные
+.DS_Store
+Thumbs.db
+
+# Логи
+*.log
+
+# Секреты (на всякий случай)
+.env
+*.env
+config.py
+secrets.py
+
+# Render
+__pycache__/
